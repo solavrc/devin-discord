@@ -230,8 +230,8 @@
 
 - **API 安定性:** Alpha 版のため、変更の可能性あり。
 - **非同期性:** `GET /session/{session_id}` は定期的なポーリングが必要。推奨間隔は 10-30 秒 ([Structured Output](https://docs.devin.ai/api-reference/structured-output))。
-- **Structured Output の活用:** プロンプトでのスキーマ定義と更新指示が重要。ただし、更新タイミングは Devin 次第。
-- **会話フローの限界:** `POST /message` への直接的な会話応答はない。
+- **Structured Output の活用:** プロンプトでのスキーマ定義と更新指示が重要。ただし、更新タイミングは Devin 次第。**現状、単純な会話応答の取得には不向きな可能性が高い。**
+- **会話フローの限界:** `POST /message` への直接的な会話応答はない。**Web UI で表示されるような詳細な思考プロセスやテキスト応答は、現状の API では取得できない可能性が高い。**
 - **エラーハンドリング:** API リクエスト失敗時のリトライ、予期せぬセッション状態への対応が必要。
 - **レート制限:** 公式ドキュメントに明記されていないが、過度なポーリングは避ける。
 - **Idempotency:** ([Overview](https://docs.devin.ai/api-reference/overview))
@@ -239,6 +239,10 @@
     - `POST /sessions` など対応するエンドポイントで `idempotent: true` を設定する。
     - 同じリクエストを再試行した場合、新しいリソースを作成せず既存のものを返す。
     - レスポンスの `is_new_session` フィールドで新規作成かどうかがわかる。
+- **キーワード (`sleep`, `exit`, `mute`, `unmute` など):**
+    - `sleep`, `exit` などの一部のキーワードは、`POST /session/{session_id}/message` で送信されると、Devin サーバー側で解釈され、セッションの状態を変化させる可能性がある (Web UI での挙動から推測)。
+    - しかし、これらのキーワードの正確なリストや挙動は API ドキュメントには明記されていない。
+    - `mute`, `unmute` については、現時点の API 経由での明確な効果は確認されていない。アプリケーションレベルでのミュート機能が必要な場合は、クライアント側での実装が必要となる。
 
 ## 5. コード例 (TypeScript / Node.js)
 

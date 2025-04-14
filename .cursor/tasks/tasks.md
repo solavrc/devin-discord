@@ -8,6 +8,15 @@
 
 ---
 
+**開発上の注意 (2025-04-14):**
+現在、Devin API (v1 Alpha) 経由で Web UI のような自然な会話応答テキストを取得する方法が不明瞭です。
+`GET /v1/session/{session_id}` で取得できるのは主にステータスと `structured_output` に限られるように見えます。
+`structured_output` を利用して応答を格納させる試みも行いましたが、応答格納直後にセッションが `blocked` 状態となり会話が継続できませんでした。
+この点について Devin Team に質問を送信済みであり、回答待ちです。
+今後の会話応答に関する実装は、Devin Team からの回答や API のアップデートに依存する可能性があります。
+
+---
+
 ## フェーズ 1: 基本的な対話ループ (MVP)
 
 **目的:** Discord Bot をサーバーに接続し、メンションをトリガーに Devin セッションを開始、作成されたスレッド内でユーザーからの指示を Devin に送信し、Devin からの応答（ステータス変化や出力）をスレッドに表示する、基本的な対話ループを実現する。
@@ -18,27 +27,27 @@
     -   [x] Fargate サービス、タスク定義 (Node.js/discord.js)
     -   [x] Secrets Manager Secret (Discord Bot Token, Devin API Key)
 -   [ ] **Devin API クライアント (src/lib/devinClient.ts など):**
-    -   [ ] `POST /v1/sessions` の実装
-    -   [ ] `POST /v1/session/{session_id}/message` の実装
-    -   [ ] `GET /v1/session/{session_id}` の実装
+    -   [x] `POST /v1/sessions` の実装
+    -   [x] `POST /v1/session/{session_id}/message` の実装
+    -   [x] `GET /v1/session/{session_id}` の実装
 -   [ ] **Discord Bot (src/):**
-    -   [ ] `discord.js` クライアント初期化、Discord Gateway 接続
+    -   [x] `discord.js` クライアント初期化、Discord Gateway 接続
     -   [x] Bot Token, Devin API Key を Secrets Manager から読み込む
-    -   [ ] `messageCreate` イベントハンドラ:
-        -   [ ] `@Bot名` メンションを検知
-        -   [ ] メンションされたメッセージを基に **(実装済みの API クライアントを利用して)** `POST /v1/sessions` を呼び出し、Devin セッションを開始
-        -   [ ] メンションされたメッセージに対して Discord スレッドを作成
-        -   [ ] スレッド内にセッション開始メッセージと Devin セッション URL を投稿
-        -   [ ] **スレッド内の後続メッセージを検知**
-        -   [ ] 後続メッセージを対応する Devin セッションに **(実装済みの API クライアントを利用して)** `POST /v1/session/{session_id}/message` で転送 (※ `aside` キーワードは無視する方向で検討)
-        -   [ ] セッション開始後、Devin セッションの監視を開始する
-    -   [ ] **Devin セッション監視:**
-        -   [ ] **(実装済みの API クライアントを利用して)** `GET /v1/session/{session_id}` を定期的にポーリングする処理を追加 (推奨間隔: 10-30秒)
-        -   [ ] セッションステータス (`status_enum`) の変化 (特に `blocked`, `stopped`, `finished` など) を検知し、スレッドに通知
-        -   [ ] `structured_output` の更新を検知し、スレッドに通知 (オプション/必要に応じて)
-        -   [ ] セッション終了状態になったらポーリングを停止
+    -   [x] `messageCreate` イベントハンドラ:
+        -   [x] `@Bot名` メンションを検知
+        -   [x] メンションされたメッセージを基に **(実装済みの API クライアントを利用して)** `POST /v1/sessions` を呼び出し、Devin セッションを開始
+        -   [x] メンションされたメッセージに対して Discord スレッドを作成
+        -   [x] スレッド内にセッション開始メッセージと Devin セッション URL を投稿
+        -   [x] **スレッド内の後続メッセージを検知**
+        -   [x] 後続メッセージを対応する Devin セッションに **(実装済みの API クライアントを利用して)** `POST /v1/session/{session_id}/message` で転送 (※ `aside` キーワードは無視する方向で検討)
+        -   [x] セッション開始後、Devin セッションの監視を開始する
+    -   [x] **Devin セッション監視:**
+        -   [x] **(実装済みの API クライアントを利用して)** `GET /v1/session/{session_id}` を定期的にポーリングする処理を追加 (推奨間隔: 10-30秒)
+        -   [x] セッションステータス (`status_enum`) の変化 (特に `blocked`, `stopped`, `finished` など) を検知し、スレッドに通知
+        -   [x] `structured_output` の更新を検知し、スレッドに通知 (オプション/必要に応じて)
+        -   [x] セッション終了状態になったらポーリングを停止
 -   [ ] **エラーハンドリング:**
-    -   [ ] Devin API 呼び出し (セッション開始、メッセージ送信、監視) 時の基本的なエラー処理とスレッドへの通知
+    -   [x] Devin API 呼び出し (セッション開始、メッセージ送信、監視) 時の基本的なエラー処理とスレッドへの通知
 -   [ ] **テスト (test/bot.test.ts など):**
     -   [ ] メンション検知ロジックの単体テスト
     -   [ ] スレッド内メッセージ転送ロジックの単体テスト
@@ -68,44 +77,4 @@
         -   [ ] スレッド内メッセージ受信時/監視時に、DynamoDB から対応する Devin セッション ID やミュート状態を取得
 -   [ ] **テスト (test/):**
     -   [ ] `snapshot`/`playbook` キーワード解析の単体テスト
-    -   [ ] Bot レベルの `mute`/`unmute` 機能のテスト
-    -   [ ] DynamoDB を利用した状態管理ロジックのテスト
--   [ ] **デプロイと動作確認:**
-    -   [ ] 機能追加後のデプロイ
-    -   [ ] キーワード (`snapshot`, `playbook`, `mute`, `unmute`) の動作確認
-    -   [ ] Bot 再起動後もスレッドでの対話が継続できることを確認
-
----
-
-## フェーズ 3: ファイル添付とオプション機能
-
-**目的:** ファイル添付によるコンテキスト提供、アカウント連携、DM 通知などのオプション機能の実装、および全体的な安定性やUXの改善を行う。
-
-**タスク:**
-
--   [ ] **Discord Bot (src/):**
-    -   [ ] `messageCreate` ハンドラ:
-        -   [ ] メンション時、メッセージに添付ファイルがあれば **(実装済みの API クライアントを利用して)** `POST /v1/attachments` でアップロードし、ファイル URL を `POST /v1/sessions` の `prompt` に含める
-        -   [ ] スレッド内のメッセージに添付ファイルがあれば、同様にアップロードし、ファイル URL を `POST /v1/session/{session_id}/message` の `message` に含める
-    -   [ ] **Devin API クライアント:**
-        -   [ ] `POST /v1/attachments` の実装
--   [ ] **エラーハンドリング:**
-    -   [ ] ファイルアップロード失敗時のエラー処理
--   [ ] **インフラ (CDK):**
-    -   [ ] (任意) アカウント連携用 API Gateway, Lambda
--   [ ] **Discord Bot (src/):**
-    -   [ ] (任意) Devin アカウントと Discord アカウントの連携機能 (OAuth フローなど)
-    -   [ ] (任意) アカウント連携に基づいた DM 通知機能
-    -   [ ] (任意) スラッシュコマンドの実装 (`/devin start`, `/devin send` など)
-    -   [ ] リファクタリング、コード品質向上
-    -   [ ] 詳細なエラーハンドリングとロギング (CloudWatch Logs)
--   [ ] **テスト (test/):**
-    -   [ ] ファイル添付処理の単体テスト
-    -   [ ] (任意) オプション機能のテスト
-    -   [ ] (任意) E2E テスト
--   [ ] **ドキュメント:**
-    -   [ ] `README.md` の更新 (使い方、設定方法など)
--   [ ] **デプロイと動作確認:**
-    -   [ ] 機能追加後のデプロイ
-    -   [ ] ファイル添付機能の確認
-    -   [ ] (任意) オプション機能の確認
+    -   [ ] Bot レベルの `mute`
