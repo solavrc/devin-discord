@@ -1,0 +1,10 @@
+node_modules
+cdk.out
+.git
+.gitignore
+.npmignore
+.env
+README.md
+Dockerfile
+.dockerignore
+*.log

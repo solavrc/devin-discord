@@ -23,14 +23,14 @@
 
 **タスク:**
 
--   [ ] **インフラ (CDK):**
+-   [x] **インフラ (CDK):**
     -   [x] Fargate サービス、タスク定義 (Node.js/discord.js)
     -   [x] Secrets Manager Secret (Discord Bot Token, Devin API Key)
--   [ ] **Devin API クライアント (src/lib/devinClient.ts など):**
+-   [x] **Devin API クライアント (src/lib/devinClient.ts など):**
     -   [x] `POST /v1/sessions` の実装
     -   [x] `POST /v1/session/{session_id}/message` の実装
     -   [x] `GET /v1/session/{session_id}` の実装
--   [ ] **Discord Bot (src/):**
+-   [x] **Discord Bot (src/):**
     -   [x] `discord.js` クライアント初期化、Discord Gateway 接続
     -   [x] Bot Token, Devin API Key を Secrets Manager から読み込む
     -   [x] `messageCreate` イベントハンドラ:
@@ -46,14 +46,14 @@
         -   [x] セッションステータス (`status_enum`) の変化 (特に `blocked`, `stopped`, `finished` など) を検知し、スレッドに通知
         -   [x] `structured_output` の更新を検知し、スレッドに通知 (オプション/必要に応じて)
         -   [x] セッション終了状態になったらポーリングを停止
--   [ ] **エラーハンドリング:**
+-   [x] **エラーハンドリング:**
     -   [x] Devin API 呼び出し (セッション開始、メッセージ送信、監視) 時の基本的なエラー処理とスレッドへの通知
 -   [ ] **テスト (test/bot.test.ts など):**
     -   [ ] メンション検知ロジックの単体テスト
     -   [ ] スレッド内メッセージ転送ロジックの単体テスト
     -   [ ] セッション監視・通知ロジックの単体テスト
 -   [ ] **デプロイと動作確認:**
-    -   [ ] CDK で AWS 環境にデプロイ
+    -   [x] CDK で AWS 環境にデプロイ
     -   [ ] Discord サーバーで基本的なメンション → スレッド作成 → スレッド内指示 → Devin からの応答/ステータス通知 の流れを確認
 
 ---
@@ -64,17 +64,17 @@
 
 **タスク:**
 
--   [ ] **インフラ (CDK):**
-    -   [ ] DynamoDB テーブル定義 (スレッド ID と Devin セッション ID のマッピング、ミュート状態等)
-    -   [ ] Fargate タスクロールに DynamoDB 読み書き権限を追加
+-   [x] **インフラ (CDK):**
+    -   [x] DynamoDB テーブル定義 (スレッド ID と Devin セッション ID のマッピング、ミュート状態等)
+    -   [x] Fargate タスクロールに DynamoDB 読み書き権限を追加
 -   [ ] **Discord Bot (src/):**
-    -   [ ] `messageCreate` ハンドラ:
+    -   [x] `messageCreate` ハンドラ:
         -   [ ] メンション時に `snapshot:<id>`, `playbook:<id>` キーワードを解析し、`(実装済みの API クライアントを利用して)` `POST /v1/sessions` に渡す
-        -   [ ] スレッド内で `mute`/`unmute` キーワードを検知し、Bot 内部で対象スレッドのミュート状態を管理 (DynamoDB に保存)
-        -   [ ] ミュート中のスレッドからのメッセージは Devin に転送しない
-    -   [ ] **状態管理:**
-        -   [ ] スレッド作成時に、Discord スレッド ID と Devin セッション ID のマッピングを DynamoDB に保存
-        -   [ ] スレッド内メッセージ受信時/監視時に、DynamoDB から対応する Devin セッション ID やミュート状態を取得
+        -   [x] スレッド内で `mute`/`unmute` キーワードを検知し、Bot 内部で対象スレッドのミュート状態を管理 (DynamoDB に保存)
+        -   [x] ミュート中のスレッドからのメッセージは Devin に転送しない
+    -   [x] **状態管理:**
+        -   [x] スレッド作成時に、Discord スレッド ID と Devin セッション ID のマッピングを DynamoDB に保存
+        -   [x] スレッド内メッセージ受信時/監視時に、DynamoDB から対応する Devin セッション ID やミュート状態を取得
 -   [ ] **テスト (test/):**
     -   [ ] `snapshot`/`playbook` キーワード解析の単体テスト
-    -   [ ] Bot レベルの `mute`
+    -   [ ] Bot レベルの `mute` / `unmute` 処理の単体/統合テスト (DynamoDB連携含む)
